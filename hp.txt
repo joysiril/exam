@@ -1,0 +1,14 @@
+String hp=dr.findElement(By.xpath("//*[@id=\"top-of-content\"]/div/div[3]/div/div/div[2]/section[1]/div[3]/div/div[1]/div/table/tbody/tr[4]/td[2]/div")).getText();
+System.out.println(hp);
+
+hp = "195 (265) / 4,000";
+String res = hp.substring(5,8);
+System.out.println("res :"+res);
+int r=Integer.parseInt(res);
+System.out.println("r :"+r);
+if(r<500)
+{
+Assert.fail("Does not meet my requirements");
+} else {
+System.out.println("passed");
+}  

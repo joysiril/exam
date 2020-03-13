@@ -1,0 +1,114 @@
+public class WrapperClass
+{
+public WebDriver driver;
+
+//Method function to launch the chrome browser 
+public void launchbrowser(String url)
+{
+	//To specify the download path of IE DriverServer
+	String downpath= System.getProperty("user.dir")+File.separator+"downloads";
+	System.out.println(downpath);
+	
+	Map<String,String> prefference= new HashMap<String,String>();
+	prefference.put("download.default_directory", downpath);
+	
+	ChromeOptions options= new ChromeOptions();
+	options.setExperimentalOption("prefs", prefference);
+	
+	//To launch the chrome browser
+	System.setProperty("webdriver.chrome.driver", "C:\\Users\\BLTuser.BLT182\\Desktop\\176 project\\SeleniumHQ project\\resources\\Drivers\\chromedriver.exe");
+	driver= new ChromeDriver(options);
+	driver.get(url);
+}
+
+//Screenshot method to take screenshot at specified path 
+public void screenshot(String path) throws IOException
+{
+	File screen=((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+	FileUtils.copyFile(screen,new File(path));
+}
+
+//Method to close browser
+public void CloseBrowser()
+{
+	driver.close();
+}
+}
+
+
+
+public class SeleniumPage
+{
+	public WebDriver driver;
+
+	//Intilizing the WebElements for download button and 64 bit windowsIE button 
+	@FindBy(xpath="//*[@id='navbar']/a[1]")
+	public WebElement Download;
+	
+	@FindBy(partialLinkText="64 bit Windows IE")
+	public WebElement WindowsIE;
+
+
+public SeleniumPage(WebDriver driver)
+{
+	this.driver=driver;
+		
+}
+
+//Operations for cliking on the download and 64 windowIE using WebElements
+public void seleniumdownload() throws InterruptedException
+{
+	Download.click();
+	Thread.sleep(2000);
+	
+	WindowsIE.click();
+	Thread.sleep(5000);
+}
+
+
+}
+
+
+
+
+
+public class SeleniumTestAssert extends WrapperClass
+{
+	//In BeforeTest annotation launch the browser operation is performed
+	@BeforeTest
+	public void launch() throws IOException
+	{
+		launchbrowser("https://www.selenium.dev/");
+		screenshot("C:\\Users\\BLTuser.BLT182\\Desktop\\176 project\\SeleniumHQ project\\resources\\Screenshot\\launch.jpg");
+	}
+
+	//Through Test annotation we perform specifed operations
+	@Test
+	public void testdata() throws InterruptedException
+	{
+		//seleniumpage class constructor 
+		SeleniumPage seleniumpage= new SeleniumPage(driver);
+		seleniumpage = PageFactory.initElements(driver, SeleniumPage.class);
+
+		seleniumpage.seleniumdownload();
+		
+		//Thread.sleep is for pausing the next operation
+		Thread.sleep(3000);
+		//Download loaction for the WindowsIE 64bit in the downloads folder
+		File f= new File("C:\\Users\\BLTuser.BLT182\\Desktop\\176 project\\SeleniumHQ project\\downloads");
+		boolean a= f.exists();
+		
+		SoftAssert sort= new SoftAssert();
+		sort.assertTrue(a, "Doesn't meet my requirements");
+		sort.assertAll();
+		System.out.println(a);
+	}
+	
+	//To close the browser
+	@AfterTest
+	public void close()
+	{
+		CloseBrowser();
+	}
+}
+

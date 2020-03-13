@@ -1,0 +1,186 @@
+public class WrapperClass {
+protected WebDriver dr;
+	//To launch and maximize the browser
+	public void launchAPP(String url){
+		System.setProperty("webdriver.chrome.driver", "test resources/driver data/chromedriver_v79.exe");
+		dr=new ChromeDriver();
+		dr.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		dr.get(url);
+	}
+	//To Take Screenshot
+	public void screenShot(String path) throws IOException{
+		File Sshot=((TakesScreenshot)dr).getScreenshotAs(OutputType.FILE);
+		FileUtils.copyFile(Sshot, new File(path));
+	}
+	//To close the browser
+	public void quit()
+	{
+		dr.close();
+	}
+
+
+}
+
+
+
+
+
+
+public class excel {
+
+	
+		String s;
+		public String readXL(String path,String sheets, int i, int j){
+			File f=new File(path);
+			try {
+				FileInputStream fis =new FileInputStream(f);
+				XSSFWorkbook  wb= new XSSFWorkbook(fis);
+				XSSFSheet sheet=wb.getSheet(sheets);
+				XSSFRow row= sheet.getRow(i);
+				XSSFCell cell=row.getCell(j);
+				if(cell.getCellType() == CellType.NUMERIC) 
+				{
+					s = NumberToTextConverter.toText(cell.getNumericCellValue());
+				}
+				else 
+					s=cell.getStringCellValue();
+				wb.close();
+
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return s;
+		}
+		public void writeXL(String path, String s, String sheetNo, int i, int j){
+			File f= new File(path);
+			FileInputStream fis;
+			try {
+				fis = new FileInputStream(f);
+				XSSFWorkbook  wb= new XSSFWorkbook(fis);
+				XSSFSheet sheet=wb.getSheet(sheetNo);
+				XSSFRow row= sheet.getRow(i);
+
+				XSSFCell cell=row.createCell(j);
+				FileOutputStream fos =new FileOutputStream(f);
+				cell.setCellValue(s);
+				wb.write(fos);
+				wb.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+
+
+
+	}
+
+
+
+
+
+
+
+
+
+
+public class pom extends WrapperClass{
+	
+	@FindBy(xpath="//*[@id='textWithUI-262899300']/div/div[2]/a")
+	public WebElement whale;
+	
+	@FindBy(xpath="/html/body/div[1]/div[1]/div[2]/div/div/div[4]/div/div/div/div[3]/div/nav/div[2]/a")
+	public WebElement ships;
+	
+	@FindBy(xpath="/html/body/div[1]/div[2]/div[1]/div/div[6]/div/section/div/div[16]/a/div/figcaption/p[1]")
+	public WebElement rhapsody;
+	
+	@FindBy(xpath="//*[@id='superHero-1073688544']/div[4]/div/div/div/div/div[3]/a")
+	public WebElement deck;
+	
+	@FindBy(xpath="/html/body/div[1]/div[2]/div/div[1]/div/div/div[2]/section/div[1]/label/select")
+	public WebElement deckno;
+	
+	@FindBy(xpath="/html/body/div[1]/div[2]/div/div[1]/div/div/div[2]/section/section[2]/section[1]/div[2]/section[5]/h4")
+	public WebElement royal;
+	
+	public String alaskawhalePOM() throws InterruptedException{
+		Thread.sleep(5000);
+		String arWhale=whale.getText();
+		return arWhale;
+		}
+	
+	/*public String alaskacruisePOM(String number) throws InterruptedException{*/
+		public String alaskacruisePOM() throws InterruptedException	{
+		Thread.sleep(5000);
+		ships.click();
+		Thread.sleep(9000);
+		rhapsody.click();
+		Thread.sleep(9000);
+		deck.click();
+		Thread.sleep(5000);
+		Select no=new Select(deckno);
+		no.selectByVisibleText("Deck Eight");
+		Thread.sleep(7000);
+		String arCruise= royal.getText();
+		return arCruise;
+		
+		
+	}
+
+	
+	
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public class testcase01 extends WrapperClass {
+	static pom cpom;
+
+	@BeforeTest
+	public void launch(){
+		launchAPP("https://www.royalcaribbean.com/alaska-cruises");
+	}
+
+
+	@Test
+	public void testCase() throws InterruptedException{
+		excel data=new excel();
+		cpom = PageFactory.initElements(dr, pom.class);
+		String ar1=cpom.alaskawhalePOM();
+		String er1="whale watching tour";
+		
+		String ar2=cpom.alaskacruisePOM();
+		String er2="Royal Suite - 1 Bedroom";
+		
+		SoftAssert sa=new SoftAssert();
+		sa.assertEquals(ar1, er1);
+		sa.assertEquals(ar2, er2);
+		sa.assertAll();
+	}
+	 @AfterTest
+		public void closeapp()
+		{
+		 quit();
+		}
+}

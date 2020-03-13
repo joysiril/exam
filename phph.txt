@@ -1,0 +1,217 @@
+package baseClassPHP;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+public class WrapperClassPHP {
+protected WebDriver dr;
+	
+	public void launchAPP(String url){
+		System.setProperty("webdriver.chrome.driver", "C:\\Users\\BLTuser.BLT182\\Desktop\\176 project\\PHPTravels\\src\\test\\resources\\Drivers\\chromedriver_v80.exe");
+		dr=new ChromeDriver();
+		dr.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+		dr.get(url);
+	}
+	
+	public void screenShot(String path) throws IOException{
+		File Sshot=((TakesScreenshot)dr).getScreenshotAs(OutputType.FILE);
+		FileUtils.copyFile(Sshot, new File(path));
+	}
+	
+	public void quit()
+	{
+		dr.close();
+	}
+
+
+}
+
+package excelPHP;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.util.NumberToTextConverter;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+public class excelPHP {
+	String s;
+	public String readXL(String path,int i, int j){
+		File f=new File(path);
+		try {
+			FileInputStream fis =new FileInputStream(f);
+			XSSFWorkbook  wb= new XSSFWorkbook(fis);
+			XSSFSheet sheet=wb.getSheet("Sheet1");
+			XSSFRow row= sheet.getRow(i);
+			XSSFCell cell=row.getCell(j);
+			if(cell.getCellType() == CellType.NUMERIC) {
+				s = NumberToTextConverter.toText(cell.getNumericCellValue());
+			}
+			else 
+				s=cell.getStringCellValue();
+			wb.close();
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return s;
+	}
+	public void writeXL(String path, String s, String sheetNo, int i, int j){
+		File f= new File(path);
+		FileInputStream fis;
+		try {
+			fis = new FileInputStream(f);
+			XSSFWorkbook  wb= new XSSFWorkbook(fis);
+			XSSFSheet sheet=wb.getSheet(sheetNo);
+			XSSFRow row= sheet.getRow(i);
+
+			XSSFCell cell=row.createCell(j);
+			FileOutputStream fos =new FileOutputStream(f);
+			cell.setCellValue(s);
+			wb.write(fos);
+			wb.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+}
+
+
+package pageObjectModel;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+
+public class phpPOM {
+	@FindBy(id="dropdownCurrency")
+	public WebElement currency;
+	
+	@FindBy(xpath="/html/body/div[2]/header/div[1]/div/div/div[2]/div/ul/li[1]/div/div/div/a[1]")
+	public WebElement eur;
+	
+	@FindBy(xpath="/html/body/div[2]/div[1]/div[3]/section/div/div[2]/div/div/div/div/div/div/div/div[2]/div/div[2]/a")
+	public WebElement viewMore;
+	
+	@FindBy(xpath="/html/body/div[2]/div[1]/div[1]/section/div/div/div[2]/div/div/div[7]/div/div[2]/div/div[3]/div/div/a")
+	public WebElement readMore;
+	
+	@FindBy(name="name")
+	public WebElement name;
+	
+	@FindBy(name="phone")
+	public WebElement phone;
+	
+	@FindBy(xpath="/html/body/div[2]/div[1]/div[3]/section/div/div/div/div/div/article/div[3]/form/fieldset/div/div[6]/input[3]")
+	public WebElement contact;
+	
+	@FindBy(name="message")
+	public WebElement message;
+
+	@FindBy(xpath="/html/body/div[2]/div[1]/div[3]/section/div/div/div/div/div/article/div[3]/form/fieldset/div[1]")
+	public WebElement pop;
+	
+	
+	
+	public void summerVacation() throws InterruptedException{
+		currency.click();
+		 eur.click();
+		 Thread.sleep(5000);
+		viewMore.click();
+		Thread.sleep(5000);
+		readMore.click();}
+	public void name(String name1){
+		name.sendKeys(name1);}
+	public void phone(String phoneno){
+		phone.sendKeys(phoneno);}
+	public String message(String msg) throws InterruptedException{
+		Thread.sleep(5000);
+		message.sendKeys(msg);
+		contact.click();
+		String str=pop.getText();
+		return str;}
+	
+	
+	
+
+}
+
+package TestCases;
+
+import java.io.IOException;
+
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.support.PageFactory;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
+
+import baseClassPHP.WrapperClassPHP;
+import excelPHP.excelPHP;
+import pageObjectModel.phpPOM;
+
+public class Testcase01 extends WrapperClassPHP {
+	static phpPOM ppom;
+	@BeforeTest
+	public void launch(){
+		launchAPP("https://www.phptravels.net/home");
+	}
+	@Test
+	public void testcase() throws IOException, InterruptedException{
+		JavascriptExecutor js = (JavascriptExecutor) dr;
+		ppom=PageFactory.initElements(dr, phpPOM.class);
+		excelPHP data = new excelPHP();
+		ppom.summerVacation();
+		ppom.name(data.readXL("C:\\Users\\BLTuser.BLT182\\Desktop\\176 project\\PHPTravels\\src\\test\\resources\\TestData\\phpXL.xlsx", 1, 0));
+		ppom.phone(data.readXL("C:\\Users\\BLTuser.BLT182\\Desktop\\176 project\\PHPTravels\\src\\test\\resources\\TestData\\phpXL.xlsx", 1, 1));
+		String er=ppom.message(data.readXL("C:\\Users\\BLTuser.BLT182\\Desktop\\176 project\\PHPTravels\\src\\test\\resources\\TestData\\phpXL.xlsx", 1, 2));
+		js.executeScript("window.scrollBy(0,800)");
+		screenShot("C:\\Users\\BLTuser.BLT182\\Desktop\\176 project\\PHPTravels\\src\\test\\resources\\ScreenShot\\php1.png");
+		String ar=data.readXL("C:\\Users\\BLTuser.BLT182\\Desktop\\176 project\\PHPTravels\\src\\test\\resources\\TestData\\phpXL.xlsx", 1, 3);
+		SoftAssert sa=new SoftAssert();
+		sa.assertEquals(ar, er);
+		sa.assertAll();
+		if(er.equals(ar))
+		{
+			System.out.println("pass");
+			data.writeXL("C:\\Users\\BLTuser.BLT182\\Desktop\\176 project\\PHPTravels\\src\\test\\resources\\TestData\\phpXL.xlsx", ar, "Sheet1", 1, 4);
+			data.writeXL("C:\\Users\\BLTuser.BLT182\\Desktop\\176 project\\PHPTravels\\src\\test\\resources\\TestData\\phpXL.xlsx", "pass", "Sheet1", 1, 5);
+		}
+		else
+		{
+			System.out.println("fail");
+			data.writeXL("C:\\Users\\BLTuser.BLT182\\Desktop\\176 project\\PHPTravels\\src\\test\\resources\\TestData\\phpXL.xlsx", ar, "Sheet1", 1, 4);
+			data.writeXL("C:\\Users\\BLTuser.BLT182\\Desktop\\176 project\\PHPTravels\\src\\test\\resources\\TestData\\phpXL.xlsx", "fail", "Sheet1", 1, 5);
+		}
+	}
+	@AfterTest
+	public void closeap(){
+		quit();
+	}
+}
